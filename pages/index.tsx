@@ -1,11 +1,48 @@
 import Head from 'next/head'
-import Image from 'next/image'
 import { Inter } from '@next/font/google'
-import styles from '@/styles/Home.module.css'
+import { useEffect, useState } from 'react'
+import Link from 'next/link'
+import { Loader } from '@/components/Loader'
+import axios from 'axios'
 
 const inter = Inter({ subsets: ['latin'] })
 
+export interface Props {
+  data: Dataprops[];
+}
+
+export interface Dataprops {
+  id: string,
+  name: string,
+  tag: string,
+  color: string,
+  criteria: criteria[]
+}
+
+interface criteria {
+  text: string,
+  type: string
+}
+
 export default function Home() {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [postsData, setPostsData] = useState<Dataprops[]>();
+  const fetchData = async () => {
+    setLoading(true)
+    await axios.get('https://jsonware.com/api/v1/json/402b9d6d-9862-4c19-b336-c456999258d6')
+      .then((res) => {
+        setPostsData(res.data.data)
+        setLoading(false)
+      }).catch((e) => {
+        setError(e)
+        setLoading(false)
+      })
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
   return (
     <>
       <Head>
@@ -14,108 +51,33 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main className={styles.main}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              By{' '}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
-          </div>
-        </div>
+      <main className='bg-gray-100'>
+        <div className='h-screen w-full flex justify-center items-center'>
 
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-          <div className={styles.thirteen}>
-            <Image
-              src="/thirteen.svg"
-              alt="13"
-              width={40}
-              height={31}
-              priority
-            />
-          </div>
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2 className={inter.className}>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p className={inter.className}>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
+          {
+            error === null && loading ? <Loader /> :
+              error !== null ? <p>{error}</p> :
+                postsData &&
+                <div className='bg-white rounded-md'>
+                  {postsData.map((post: Dataprops) => {
+                    return (
+                      <Link key={post.id} href={`details/${post.id}`}>
+                        <div className='hover:bg-gray-50 px-5 py-4 flex justify-between border-b'>
+                          <h1 className='text-indigo-600 font-medium flex-1'>{post.name}</h1>
+                          <div className={` text-xs ml-16 inline-flex items-center font-bold leading-sm px-3 py-1 rounded-full $
+                          bg-${post.color}-100 text-${post.color}-700
+                          `}>
+                            {post.tag}
+                          </div>
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500 ml-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                          </svg>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                </div>
+          }
         </div>
       </main>
     </>
