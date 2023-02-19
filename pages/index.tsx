@@ -64,8 +64,9 @@ export default function Home() {
                       <Link key={post.id} href={`details/${post.id}`}>
                         <div className='hover:bg-gray-50 px-5 py-4 flex justify-between border-b'>
                           <h1 className='text-indigo-600 font-medium flex-1'>{post.name}</h1>
-                          <div className={` text-xs ml-16 inline-flex items-center font-bold leading-sm px-3 py-1 rounded-full $
-                          bg-${post.color.toString()}-100 text-${post.color.toString()}-700
+                          <div className={` text-xs ml-16 inline-flex items-center font-bold leading-sm px-3 py-1 rounded-full
+                          ${post.color === 'red' && 'bg-red-100 text-red-700'}
+                          ${post.color === 'green' && 'bg-green-100 text-green-700'}
                           `}>
                             {post.tag}
                           </div>
