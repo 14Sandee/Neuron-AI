@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { Loader } from '@/components/Loader'
 import axios from 'axios'
+import Error from 'next/error'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -24,7 +25,8 @@ interface criteria {
   type: string
 }
 
-export default function Home() {
+export default function Home({ errorCode }: { errorCode: any }) {
+  console.log(errorCode)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [postsData, setPostsData] = useState<Dataprops[]>();
@@ -43,6 +45,9 @@ export default function Home() {
   useEffect(() => {
     fetchData()
   }, [])
+  if (errorCode) {
+    return <Error statusCode={errorCode} />
+  }
   return (
     <>
       <Head>
@@ -83,4 +88,14 @@ export default function Home() {
       </main>
     </>
   )
+}
+
+
+export async function getServerSideProps() {
+  const res = await fetch('https://jsonware.com/api/v1/json/402b9d6d-9862-4c19-b336-c456999258d6')
+  const errorCode = res.ok ? false : res.status
+
+  return {
+    props: { errorCode },
+  }
 }
